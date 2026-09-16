@@ -605,7 +605,7 @@ SN.render = function (role, page) {
           '<div><div class="u-name">' + SN.esc(user.name) + '</div>' +
           '<div class="u-role">' + SN.esc(SN.ROLE_LABEL[role]) + '</div></div>' +
         '</div>' +
-        '<div class="mt12"><span class="proto-chip">Prototype / Demo Mode</span></div>' +
+        
       '</div>' +
     '</aside>' +
 
@@ -656,7 +656,7 @@ SN.render = function (role, page) {
   if (fn) {
     fn(main);
   } else {
-    main.innerHTML = SN.empty('Screen not found', 'This screen is not part of the prototype.');
+    main.innerHTML = SN.empty('Coming soon', 'This section is under development.')
   }
 };
 
@@ -719,4 +719,27 @@ window.addEventListener('resize', function () {
       el.style.gridTemplateColumns = ''; // let the CSS rule take over
     }
   });
-});
+});/* ---------- Responsive re-flow on resize / orientation change ---------- */
+(function () {
+  var reflow = function () {
+    var ids = ['profileGrid','bdGrid','jdGrid','profGrid','earnGrid',
+               'adGrid','fdGrid','rdGrid','wpGrid'];
+    var narrow = window.innerWidth < 960;
+    ids.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      if (narrow) {
+        el.style.gridTemplateColumns = '1fr';
+        el.style.gap = '14px';
+      } else {
+        el.style.gridTemplateColumns = ''; // let CSS take over
+        el.style.gap = '';
+      }
+    });
+  };
+  window.addEventListener('resize', reflow);
+  window.addEventListener('orientationchange', function () {
+    setTimeout(reflow, 250);
+  });
+  document.addEventListener('DOMContentLoaded', reflow);
+})();

@@ -214,7 +214,7 @@ SN.PAGES['customer:services'] = function (main) {
     '<div id="radiusHost"></div>' +
     '<div id="resultsHost"></div>';
 
-  var runSearch = function (useExpanded) {
+  var runSearch = function () {
     var radiusHost = document.getElementById('radiusHost');
     var host = document.getElementById('resultsHost');
 
@@ -225,7 +225,7 @@ SN.PAGES['customer:services'] = function (main) {
     var verifiedOnly = document.getElementById('fVerified').checked;
     var savedOnly = document.getElementById('fSaved').checked;
 
-    /* --- Smart Service Radius simulation --- */
+    /* --- Smart Service Radius --- */
     radiusHost.innerHTML = '<div class="radius-note"><span class="spinner"></span> Searching within 3 km…</div>';
     host.innerHTML = '';
 
@@ -305,7 +305,6 @@ SN.PAGES['customer:services'] = function (main) {
 function workerCard(r, context, isBest, expanded) {
   var w = r.worker;
   var ts = SN.trustScore(w);
-  var svc = SN.DATA.services.filter(function (x) { return x.key === w.serviceKey; })[0] || { name:w.trade };
 
   return '<article class="worker-card"' + (isBest ? ' style="border-color:var(--green-100)"' : '') + '>' +
     (isBest ? '<div class="badge badge-green mb12">★ Best match for your request</div>' : '') +
@@ -467,9 +466,8 @@ SN.createBooking = function (data) {
 SN.PAGES['customer:worker-profile'] = function (main) {
   var id = SN.qs('id') || 'w1';
   var w = SN.getWorker(id);
-  if (!w) { main.innerHTML = SN.empty('Worker not found', 'This worker id does not exist in the prototype.', '⌕'); return; }
+  if (!w) { main.innerHTML = SN.empty('Worker not found', 'This worker is not available.', '⌕'); return; }
 
-  var svc = SN.DATA.services.filter(function (x) { return x.key === w.serviceKey; })[0] || { name:w.trade };
   var m = SN.matchScore(w, w.serviceKey, w.distanceKm);
   var ts = SN.trustScore(w);
   var saved = SN.state.savedWorkers.indexOf(w.id) > -1;
@@ -513,7 +511,7 @@ SN.PAGES['customer:worker-profile'] = function (main) {
           '</div>' +
         '</div>' +
 
-        /* Skill Verification Passport — signature component */
+        /* Skill Verification Passport */
         '<div class="passport mb16">' +
           '<div class="passport-top">' +
             '<div><div class="pt-title">SKILL VERIFICATION PASSPORT</div>' +
@@ -586,7 +584,6 @@ SN.PAGES['customer:worker-profile'] = function (main) {
       '</div>' +
     '</div>';
 
-  /* responsive fallback for the two-column profile */
   if (window.innerWidth < 900) {
     document.getElementById('profileGrid').style.gridTemplateColumns = '1fr';
   }
@@ -671,7 +668,7 @@ function bookingCard(b) {
 SN.PAGES['customer:booking-details'] = function (main) {
   var id = SN.qs('id');
   var b = SN.getBooking(id);
-  if (!b) { main.innerHTML = SN.empty('Booking not found', 'Check the booking id in the URL.', '▤'); return; }
+  if (!b) { main.innerHTML = SN.empty('Booking not found', 'Check the booking link and try again.', '▤'); return; }
 
   var w = SN.getWorker(b.workerId);
   var idx = SN.stepIndex(b.status);
@@ -695,17 +692,14 @@ SN.PAGES['customer:booking-details'] = function (main) {
           '<div class="card-head"><div class="card-title">Booking Tracking</div>' +
           (b.urgent ? '<span class="badge badge-red">Priority</span>' : '') + '</div>' +
           SN.timeline(b) +
-          (!cancelled && b.status !== 'Completed'
-            ? '<hr class="divider"><p class="tiny muted mb0">Demo tip: switch to the Worker role and use the action buttons on this job to advance the timeline.</p>'
-            : '') +
           (b.status === 'Completed'
             ? '<hr class="divider"><div class="row" style="gap:10px"><span class="dot dot-green"></span>' +
               '<span class="small">Service completed on ' + SN.fmtDT(b.completedAt) + '</span></div>' : '') +
         '</div>' +
 
-        /* Simulated map */
+        /* Location */
         '<div class="card mb16">' +
-          '<div class="card-head"><div class="card-title">Live Location (simulated)</div>' +
+          '<div class="card-head"><div class="card-title">Live Location</div>' +
           '<span class="badge badge-blue">Smart Radius 3 km</span></div>' +
           '<div class="map-box">' +
             '<div class="map-ring ' + (SN.state.radiusExpanded ? 'expanded' : 'base') + '"></div>' +
@@ -715,7 +709,6 @@ SN.PAGES['customer:booking-details'] = function (main) {
             '<div class="map-line" style="height:' + (idx >= 2 ? 60 : 150) + 'px;transform:rotate(' + (idx >= 2 ? '8deg' : '22deg') + ')"></div>' +
             '<div class="map-label">Approx. ' + (w ? w.distanceKm : '2.1') + ' km away · ETA ~' + (w ? w.avgResponseMin : 12) + ' min</div>' +
           '</div>' +
-          '<p class="tiny muted mt12 mb0">Map is an illustrative HTML/CSS visualisation. No GPS or map API is used in this prototype.</p>' +
         '</div>' +
 
         /* Backup worker block */
@@ -724,7 +717,7 @@ SN.PAGES['customer:booking-details'] = function (main) {
           '<span class="badge badge-amber">Cover available</span></div>' +
           '<p class="small muted">If ' + SN.esc(b.workerName) + ' does not respond within the response window, verified alternatives nearby are suggested instantly.</p>' +
           '<div class="btn-row">' +
-            '<button class="btn btn-ghost btn-sm" id="noRespondBtn">Simulate: worker hasn\'t responded</button>' +
+            '<button class="btn btn-ghost btn-sm" id="noRespondBtn">Report non-response</button>' +
           '</div>' +
           '<div id="backupList" class="mt16"></div>' +
         '</div>' +
@@ -795,7 +788,7 @@ SN.PAGES['customer:booking-details'] = function (main) {
     document.getElementById('bdGrid').style.gridTemplateColumns = '1fr';
   }
 
-  /* Backup worker simulation */
+  /* Backup worker */
   document.getElementById('noRespondBtn').addEventListener('click', function () {
     var alts = SN.rankWorkers(b.serviceKey, { maxDist:5, verifiedOnly:true })
       .filter(function (r) { return r.worker.id !== b.workerId; })
@@ -918,13 +911,12 @@ function openPaymentModal(bookingId) {
       '</div>' +
       '<div class="grid" style="gap:9px" id="payOpts">' +
         '<button class="pay-opt selected" data-m="UPI"><span class="po-ic">📱</span>' +
-          '<span><span class="po-name">UPI</span><br><span class="po-sub">GPay / PhonePe / Paytm — simulated</span></span></button>' +
+          '<span><span class="po-name">UPI</span><br><span class="po-sub">GPay / PhonePe / Paytm</span></span></button>' +
         '<button class="pay-opt" data-m="Cash"><span class="po-ic">💵</span>' +
           '<span><span class="po-name">Cash</span><br><span class="po-sub">Pay the worker directly</span></span></button>' +
         '<button class="pay-opt" data-m="Cooperative Wallet"><span class="po-ic">🏦</span>' +
           '<span><span class="po-name">Cooperative Wallet</span><br><span class="po-sub">Settled through the cooperative</span></span></button>' +
-      '</div>' +
-      '<p class="tiny muted mt12 mb0">This is a simulated payment. No real gateway is connected in the prototype.</p>',
+      '</div>',
     actions: [
       { label:'Cancel', cls:'btn-ghost' },
       { label:'Pay ' + SN.money(amount), cls:'btn-green', onClick: function (close) {
@@ -989,7 +981,7 @@ function openRatingModal(bookingId) {
         '<option value="5">5 — On time</option><option value="4">4 — Slightly late</option>' +
         '<option value="3">3 — Late</option><option value="2">2 — Very late</option><option value="1">1 — Did not arrive on time</option></select></div>' +
       '<div class="field mb0"><label>Comment (optional)</label>' +
-        '<textarea class="textarea" id="rC" placeholder="Anything else you'd like to share?"></textarea></div>',
+        '<textarea class="textarea" id="rC" placeholder="Anything else you\'d like to share?"></textarea></div>',
     actions: [
       { label:'Cancel', cls:'btn-ghost' },
       { label:'Submit Review', cls:'btn-primary', onClick: function (close) {
@@ -1002,7 +994,6 @@ function openRatingModal(bookingId) {
             comment: document.getElementById('rC').value,
             at: SN.nowISO()
           };
-          /* Update the mock worker rating (weighted running average) */
           if (w) {
             var totalJobs = w.jobs + 1;
             w.rating = Math.round(((w.rating * w.jobs + stars) / totalJobs) * 10) / 10;
