@@ -46,19 +46,76 @@
     gap:14px !important;
   }
 
-  .topbar{padding:10px 14px;gap:10px;}
+  /* ============================================================
+     TOPBAR — pinned compact. This is the fix for the overlap bug.
+     Uses high specificity + !important to beat any generic h1 rule.
+     ============================================================ */
+  .topbar{
+    padding:10px 12px !important;
+    min-height:56px !important;
+    height:auto !important;
+    gap:8px !important;
+    flex-wrap:nowrap !important;
+    align-items:center !important;
+  }
+  .topbar .tb-title{
+    flex:1 1 auto !important;
+    min-width:0 !important;
+    overflow:hidden !important;
+  }
+  .topbar .tb-title h1,
+  .topbar #tbTitle{
+    font-size:16px !important;
+    line-height:1.2 !important;
+    margin:0 !important;
+    padding:0 !important;
+    letter-spacing:-.01em !important;
+    font-weight:700 !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+  }
+  .topbar .tb-title .tb-sub,
+  .topbar #tbSub{
+    font-size:11.5px !important;
+    line-height:1.3 !important;
+    margin:2px 0 0 !important;
+    padding:0 !important;
+    color:var(--muted) !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+  }
+  .topbar .tb-actions{
+    flex:0 0 auto !important;
+    gap:6px !important;
+    margin-left:auto !important;
+  }
+  .topbar .tb-user{
+    padding-left:0 !important;
+    border-left:0 !important;
+    gap:0 !important;
+  }
+  .topbar .tb-user > div:last-child{ display:none !important; }
+  .topbar .icon-btn{
+    width:34px !important;
+    height:34px !important;
+    flex:none !important;
+  }
+  .topbar .lang-btn{
+    width:auto !important;
+    min-width:34px !important;
+    padding:0 8px !important;
+    font-size:11px !important;
+  }
+  /* ============================================================ */
+
   .main{padding:16px 14px 60px;}
   .tb-user .u-role{display:none;}
-  .tb-title h1{font-size:16px;}
 }
 
 /* ---------- PHONE: 720px and below ---------- */
 @media (max-width:720px){
-  h1{font-size:30px !important;}
-  h2{font-size:21px !important;}
-  h3{font-size:16px !important;}
-  .section{padding:48px 0;}
-
   /* --- Landing top nav collapses to hamburger --- */
   .nav-links{
     display:none;
@@ -111,9 +168,9 @@
 
   .hero h1{
     font-size:32px !important;
-    line-height:1.14;
-    letter-spacing:-.028em;
-    margin-bottom:16px;
+    line-height:1.14 !important;
+    letter-spacing:-.028em !important;
+    margin:0 0 16px !important;
     color:var(--text);
   }
   .hero h1 .accent{
@@ -133,16 +190,16 @@
 
   .hero .lead{
     font-size:14.5px !important;
-    line-height:1.62;
+    line-height:1.62 !important;
     color:#4A5468;
     max-width:100%;
-    margin-bottom:20px;
+    margin:0 0 20px !important;
   }
   .hero .lead strong{color:var(--text);font-weight:700;}
 
   .hero-cta{
     display:flex;flex-direction:column;
-    gap:10px;margin:0 0 18px;
+    gap:10px;margin:0 0 18px !important;
   }
   .hero-cta .btn{
     width:100%;
@@ -205,6 +262,12 @@
   .preview-bars{margin-top:12px;gap:7px;}
   .preview-foot{margin-top:12px;}
 
+  /* --- Landing section headings (scoped so they never hit the topbar) --- */
+  .section h1, .hero h1{font-size:30px !important;}
+  .section h2, .cta-band h2{font-size:21px !important;}
+  .section h3, .feature-card h3{font-size:16px !important;}
+  .section{padding:48px 0;}
+
   /* --- Every grid becomes single column --- */
   .grid,.grid-2,.grid-3,.grid-4{grid-template-columns:1fr !important;}
   .role-grid{grid-template-columns:1fr !important;}
@@ -218,6 +281,7 @@
 
   /* --- Page heads stack --- */
   .page-head{flex-direction:column;align-items:flex-start;gap:12px;}
+  .page-head h2{font-size:20px !important;}
   .page-head .btn-row{width:100%;}
   .page-head .btn-row .btn{flex:1;}
 
@@ -319,13 +383,11 @@
   .hero-cta .btn{padding:13px 16px;font-size:14px;}
   .hero-trust .trust-item{padding:9px 11px;font-size:12px;}
 
-  .hero-cta .btn{width:100%;}
   .btn-row .btn{width:100%;}
   .wc-actions .btn{min-width:100%;}
   .map-box{height:200px !important;}
   .stat-num{font-size:22px;}
-  h1{font-size:26px !important;}
-  h2{font-size:19px !important;}
+  .section h2{font-size:19px !important;}
 }
 
 /* ---------- Print ---------- */
